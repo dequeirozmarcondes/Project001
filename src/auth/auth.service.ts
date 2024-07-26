@@ -13,11 +13,12 @@ export class AuthService {
     username: string,
     pass: string,
   ): Promise<{ access_token: string }> {
-    const user = await this.usersService.findOne(username);
-    if (user?.password !== pass) {
-      throw new UnauthorizedException();
+    const user = await this.usersService.validatePassword(username, pass);
+    console.log('User:', user); // Adicione este log para depuração
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
     }
-    const payload = { sub: user.userId, username: user.username };
+    const payload = { sub: user.id, username: user.username };
     return {
       access_token: await this.jwtService.signAsync(payload),
     };

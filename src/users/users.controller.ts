@@ -10,45 +10,27 @@ import {
   UseGuards,
   Query,
   Request,
+  HttpCode,
+  HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // @Post()
-  // create(@Body() createUserDto: CreateUserDto) {
-  //   return this.usersService.create(createUserDto);
-  // }
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() createUserDto: CreateUserDto) {
+    // Verifica se o nome de usuário e a senha foram fornecidos
+    if (!createUserDto.username || !createUserDto.password) {
+      throw new BadRequestException('Username and password are required');
+    }
 
-  // @UseGuards(AuthGuard)
-  // @Get()
-  // findAll() {
-  //   return this.usersService.findAll();
-  // }
-
-  //Retorna um usuário pelo nome
-  // @Get('name')
-  // findByUserName(@Query('name') name: string) {
-  //   return this.usersService.findByUserName(name);
-  // }
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.usersService.findOne(+id);
-  // }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.usersService.update(+id, updateUserDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.usersService.remove(+id);
-  // }
+    // Cria o usuário
+    const user = await this.usersService.create(createUserDto);
+    return user;
+  }
 }
