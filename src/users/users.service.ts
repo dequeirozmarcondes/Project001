@@ -1,8 +1,12 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from 'src/prisma.service';
-import { User as PrismaUser } from '@prisma/client';
+import { User } from './entities/user.entity';
 
 const saltOrRounds = 10;
 
@@ -10,55 +14,121 @@ const saltOrRounds = 10;
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createUserDto: CreateUserDto): Promise<PrismaUser> {
-    const existingUser = await this.findOne(createUserDto.username);
-    if (existingUser) {
-      throw new ConflictException(
-        `User '${createUserDto.username}' already exists`,
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    try {
+      // Verifica se o usuário já existe pelo e-mail
+      const existingUserEmail = await this.prisma.user.findUnique({
+        where: { email: createUserDto.email },
+      });
+
+      if (existingUserEmail) {
+        throw new ConflictException(
+          `User '${createUserDto.email}' already exists`,
+        );
+      }
+
+      // Verifica se o usuário já existe pelo nome
+      const existingUserName = await this.prisma.user.findUnique({
+        where: { name: createUserDto.name },
+      });
+
+      if (existingUserName) {
+        throw new ConflictException(
+          `User '${createUserDto.name}' already exists`,
+        );
+      }
+
+      // Hasheia a senha fornecida
+      const hashedPassword = await bcrypt.hash(
+        createUserDto.password,
+        saltOrRounds,
       );
+
+      // Cria um novo usuário no banco de dados usando Prisma
+      const newUser = await this.prisma.user.create({
+        data: {
+          email: createUserDto.email,
+          password: hashedPassword,
+          name: createUserDto.name,
+        },
+      });
+
+      // Retorna a entidade User criada
+      return new User(
+        newUser.name,
+        newUser.email,
+        newUser.password,
+        newUser.id,
+        newUser.createdAt,
+        newUser.updatedAt,
+      );
+    } catch (error) {
+      console.error('Error creating user:', error.message);
+      throw new ConflictException('An error occurred while creating the user.');
     }
-
-    const hashedPassword = await bcrypt.hash(
-      createUserDto.password,
-      saltOrRounds,
-    );
-
-    // Cria um novo usuário no banco de dados usando Prisma
-    const newUser = await this.prisma.user.create({
-      data: {
-        username: createUserDto.username,
-        password: hashedPassword,
-      },
-    });
-
-    return newUser;
   }
 
   async validatePassword(
-    username: string,
+    email: string,
     password: string,
-  ): Promise<PrismaUser | null> {
-    console.log('Validating password for username:', username);
+  ): Promise<User | null> {
+    console.log('Validating password for email:', email);
 
-    const user = await this.findOne(username);
-    console.log('User found for validation:', user);
+    try {
+      // Busca o usuário pelo e-mail
+      const user = await this.prisma.user.findUnique({
+        where: { email },
+      });
+      console.log('User found for validation:', user);
 
-    if (user && (await bcrypt.compare(password, user.password))) {
-      return user;
+      // Compara a senha fornecida com a senha armazenada
+      if (user && (await bcrypt.compare(password, user.password))) {
+        return new User(
+          user.name,
+          user.email,
+          user.password,
+          user.id,
+          user.createdAt,
+          user.updatedAt,
+        );
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error validating password:', error.message);
+      throw new ConflictException(
+        'An error occurred while validating the password.',
+      );
     }
-
-    return null;
   }
 
-  async findOne(username: string): Promise<PrismaUser | null> {
-    console.log('Finding user with username:', username);
+  async findOne(name: string): Promise<User | null> {
+    console.log('Finding user with name:', name);
 
-    // Busca um usuário no banco de dados usando Prisma
-    const user = await this.prisma.user.findUnique({
-      where: { username },
-    });
+    try {
+      // Busca um usuário no banco de dados usando Prisma
+      const user = await this.prisma.user.findUnique({
+        where: { name },
+      });
 
-    console.log('Found user:', user);
-    return user || null; // Retorna null se o usuário não for encontrado
+      console.log('Found user:', user);
+
+      if (!user) {
+        return null;
+      }
+
+      // Retorna a entidade User correspondente
+      return new User(
+        user.name,
+        user.email,
+        user.password,
+        user.id,
+        user.createdAt,
+        user.updatedAt,
+      );
+    } catch (error) {
+      console.error('Error finding user:', error.message);
+      throw new ConflictException('An error occurred while finding the user.');
+    }
   }
 }

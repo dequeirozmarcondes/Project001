@@ -25,7 +25,11 @@ export class UsersController {
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createUserDto: CreateUserDto) {
     // Verifica se o nome de usuário e a senha foram fornecidos
-    if (!createUserDto.username || !createUserDto.password) {
+    if (
+      !createUserDto.name ||
+      !createUserDto.password ||
+      !createUserDto.email
+    ) {
       throw new BadRequestException('Username and password are required');
     }
 

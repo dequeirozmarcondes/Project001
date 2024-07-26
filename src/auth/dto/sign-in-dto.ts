@@ -1,14 +1,9 @@
 import { IsString, IsNotEmpty } from 'class-validator';
 
-export class CreateUserDto {
-  id?: string; // opcional, será gerado automaticamente
+export class SignInDto {
   @IsString()
   @IsNotEmpty()
   name: string;
-
-  @IsString()
-  @IsNotEmpty()
-  email: string;
 
   @IsString()
   @IsNotEmpty()

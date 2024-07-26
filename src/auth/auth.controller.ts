@@ -7,10 +7,12 @@ import {
   Post,
   UseGuards,
   Req,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { Request } from 'express';
+import { SignInDto } from './dto/sign-in-dto';
 
 @Controller('auth')
 export class AuthController {
@@ -18,8 +20,12 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  signIn(@Body() signInDto: Record<string, any>) {
-    return this.authService.signIn(signInDto.username, signInDto.password);
+  signIn(@Body() signInDto: SignInDto) {
+    // Verifica se username e password foram fornecidos
+    if (!signInDto.name || !signInDto.password) {
+      throw new BadRequestException('Username and password are required');
+    }
+    return this.authService.signIn(signInDto.name, signInDto.password);
   }
 
   @UseGuards(AuthGuard)
