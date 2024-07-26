@@ -1,18 +1,30 @@
-import { AuthResponseDto } from './auth.dto';
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
+import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
+import { Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async signIn(
-    @Body('username') username: string,
-    @Body('password') password: string,
-  ): Promise<AuthResponseDto> {
-    console.log(username, password);
-    return await this.authService.signIn(username, password);
+  signIn(@Body() signInDto: Record<string, any>) {
+    return this.authService.signIn(signInDto.username, signInDto.password);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('profile')
+  getProfile(@Req() req: Request) {
+    return req.user;
   }
 }

@@ -1,3 +1,4 @@
+import { Request as ExpressRequest } from 'express';
 import {
   Controller,
   Get,
@@ -7,6 +8,8 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
+  Request,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -17,29 +20,35 @@ import { AuthGuard } from 'src/auth/auth.guard';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
+  // @Post()
+  // create(@Body() createUserDto: CreateUserDto) {
+  //   return this.usersService.create(createUserDto);
+  // }
 
-  @UseGuards(AuthGuard)
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
-  }
+  // @UseGuards(AuthGuard)
+  // @Get()
+  // findAll() {
+  //   return this.usersService.findAll();
+  // }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
-  }
+  //Retorna um usuário pelo nome
+  // @Get('name')
+  // findByUserName(@Query('name') name: string) {
+  //   return this.usersService.findByUserName(name);
+  // }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.usersService.findOne(+id);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  //   return this.usersService.update(+id, updateUserDto);
+  // }
+
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.usersService.remove(+id);
+  // }
 }
