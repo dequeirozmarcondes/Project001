@@ -22,15 +22,15 @@ export class AuthController {
   @Post('login')
   signIn(@Body() signInDto: SignInDto) {
     // Verifica se username e password foram fornecidos
-    if (!signInDto.name || !signInDto.password) {
+    if (!signInDto.username || !signInDto.password) {
       throw new BadRequestException('Username and password are required');
     }
-    return this.authService.signIn(signInDto.name, signInDto.password);
+    return this.authService.signIn(signInDto.username, signInDto.password);
   }
 
   @UseGuards(AuthGuard)
   @Get('profile')
   getProfile(@Req() req: Request) {
-    return req.user;
+    return req.username;
   }
 }

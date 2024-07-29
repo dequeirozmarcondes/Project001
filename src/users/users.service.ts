@@ -18,23 +18,23 @@ export class UsersService {
     try {
       // Verifica se o usuário já existe pelo e-mail
       const existingUserEmail = await this.prisma.user.findUnique({
-        where: { email: createUserDto.email },
+        where: { email: createUserDto.username },
       });
 
       if (existingUserEmail) {
         throw new ConflictException(
-          `User '${createUserDto.email}' already exists`,
+          `User '${createUserDto.username}' already exists`,
         );
       }
 
       // Verifica se o usuário já existe pelo nome
       const existingUserName = await this.prisma.user.findUnique({
-        where: { name: createUserDto.name },
+        where: { username: createUserDto.username },
       });
 
       if (existingUserName) {
         throw new ConflictException(
-          `User '${createUserDto.name}' already exists`,
+          `User '${createUserDto.username}' already exists`,
         );
       }
 
@@ -49,13 +49,13 @@ export class UsersService {
         data: {
           email: createUserDto.email,
           password: hashedPassword,
-          name: createUserDto.name,
+          username: createUserDto.username,
         },
       });
 
       // Retorna a entidade User criada
       return new User(
-        newUser.name,
+        newUser.username,
         newUser.email,
         newUser.password,
         newUser.id,
@@ -63,28 +63,21 @@ export class UsersService {
         newUser.updatedAt,
       );
     } catch (error) {
-      console.error('Error creating user:', error.message);
       throw new ConflictException('An error occurred while creating the user.');
     }
   }
 
-  async validatePassword(
-    email: string,
-    password: string,
-  ): Promise<User | null> {
-    console.log('Validating password for email:', email);
-
+  async validatePassword(name: string, password: string): Promise<User | null> {
     try {
       // Busca o usuário pelo e-mail
       const user = await this.prisma.user.findUnique({
-        where: { email },
+        where: { username: name },
       });
-      console.log('User found for validation:', user);
 
       // Compara a senha fornecida com a senha armazenada
       if (user && (await bcrypt.compare(password, user.password))) {
         return new User(
-          user.name,
+          user.username,
           user.email,
           user.password,
           user.id,
@@ -95,7 +88,6 @@ export class UsersService {
 
       return null;
     } catch (error) {
-      console.error('Error validating password:', error.message);
       throw new ConflictException(
         'An error occurred while validating the password.',
       );
@@ -103,15 +95,11 @@ export class UsersService {
   }
 
   async findOne(name: string): Promise<User | null> {
-    console.log('Finding user with name:', name);
-
     try {
       // Busca um usuário no banco de dados usando Prisma
       const user = await this.prisma.user.findUnique({
-        where: { name },
+        where: { username: name },
       });
-
-      console.log('Found user:', user);
 
       if (!user) {
         return null;
@@ -119,7 +107,7 @@ export class UsersService {
 
       // Retorna a entidade User correspondente
       return new User(
-        user.name,
+        user.username,
         user.email,
         user.password,
         user.id,
@@ -127,7 +115,6 @@ export class UsersService {
         user.updatedAt,
       );
     } catch (error) {
-      console.error('Error finding user:', error.message);
       throw new ConflictException('An error occurred while finding the user.');
     }
   }
