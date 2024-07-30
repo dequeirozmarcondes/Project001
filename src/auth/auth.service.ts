@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import { CreateUserUseCase } from '../application/use-cases/create-user.use-case';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -7,7 +7,7 @@ export class AuthService {
   private readonly expiresIn: number;
 
   constructor(
-    private readonly usersService: UsersService,
+    private readonly createUserUseCase: CreateUserUseCase,
     private readonly jwtService: JwtService,
   ) {
     // Define o tempo de expiração a partir da variável de ambiente ou um valor padrão
@@ -20,7 +20,10 @@ export class AuthService {
     password: string,
   ): Promise<{ access_token: string; expires_in: number }> {
     // Valida o usuário
-    const user = await this.usersService.validatePassword(username, password);
+    const user = await this.createUserUseCase.validatePassword(
+      username,
+      password,
+    );
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }

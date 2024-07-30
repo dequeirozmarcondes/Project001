@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UsersModule } from '../users/users.module';
+import { UsersModule } from '../presentation/modules/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { jwtConstants } from './constants';
-import { UsersService } from 'src/users/users.service';
-import { PrismaService } from 'src/prisma.service';
+
+import { PrismaService } from 'src/infrastructure/database/prisma.service';
+import { CreateUserUseCase } from 'src/application/use-cases/create-user.use-case';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { PrismaService } from 'src/prisma.service';
       signOptions: { expiresIn: '3600s' },
     }),
   ],
-  providers: [AuthService, UsersService, PrismaService],
+  providers: [AuthService, CreateUserUseCase, PrismaService],
   controllers: [AuthController],
   exports: [AuthService],
 })

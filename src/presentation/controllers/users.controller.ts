@@ -9,12 +9,12 @@ import {
   ValidationPipe,
   ValidationError,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserUseCase } from 'src/application/use-cases/create-user.use-case';
+import { CreateUserDto } from '../../application/dtos/create-user.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly createUserUseCase: CreateUserUseCase) {}
 
   @Post()
   @UsePipes(
@@ -36,7 +36,7 @@ export class UsersController {
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createUserDto: CreateUserDto) {
     // A validação dos dados já é feita pelo ValidationPipe
-    const user = await this.usersService.create(createUserDto);
+    const user = await this.createUserUseCase.create(createUserDto);
     return user;
   }
 }
