@@ -17,7 +17,6 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  // Adiciona a validação de dados ao método create
   @UsePipes(
     new ValidationPipe({
       transform: true,
@@ -36,16 +35,7 @@ export class UsersController {
   )
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createUserDto: CreateUserDto) {
-    // Verifica se o nome de usuário e a senha foram fornecidos
-    if (
-      !createUserDto.username ||
-      !createUserDto.password ||
-      !createUserDto.email
-    ) {
-      throw new BadRequestException('Username and password are required');
-    }
-
-    // Cria o usuário
+    // A validação dos dados já é feita pelo ValidationPipe
     const user = await this.usersService.create(createUserDto);
     return user;
   }

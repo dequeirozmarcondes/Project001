@@ -18,12 +18,12 @@ export class UsersService {
     try {
       // Verifica se o usuário já existe pelo e-mail
       const existingUserEmail = await this.prisma.user.findUnique({
-        where: { email: createUserDto.username },
+        where: { email: createUserDto.email },
       });
 
       if (existingUserEmail) {
         throw new ConflictException(
-          `User '${createUserDto.username}' already exists`,
+          `User with email '${createUserDto.email}' already exists`,
         );
       }
 
@@ -34,7 +34,7 @@ export class UsersService {
 
       if (existingUserName) {
         throw new ConflictException(
-          `User '${createUserDto.username}' already exists`,
+          `User with username '${createUserDto.username}' already exists`,
         );
       }
 
