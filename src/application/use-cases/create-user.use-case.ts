@@ -2,10 +2,10 @@ import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { User } from '../../domain/entities/user.entity';
 import * as bcrypt from 'bcrypt';
-import { UserRepositoryInterface } from '../../application/interfaces/user.repository.interface';
+import { UserRepositoryInterface } from '../../domain/repositories/interfaces/user.repository.interface';
 import { USER_REPOSITORY_TOKEN } from 'src/application/tokens'; // Importe o token
-import { HashService } from '../services/hash-password'; // Importe o serviço de hash
-import { ValidatePasswordService } from '../services/validate-password'; // Importe o serviço de validação de senha
+import { PasswordHashService } from '../../infrastructure/services/password-hash.service'; // Importe o serviço de hash
+import { ValidatePasswordService } from '../services/auth/validate-password'; // Importe o serviço de validação de senha
 
 const saltOrRounds = 10;
 
@@ -14,7 +14,7 @@ export class CreateUserUseCase {
   constructor(
     @Inject(USER_REPOSITORY_TOKEN)
     private readonly userRepository: UserRepositoryInterface,
-    private readonly hashService: HashService, // Injete o serviço de hash
+    private readonly hashService: PasswordHashService, // Injete o serviço de hash
     private readonly validatePasswordService: ValidatePasswordService, // Injete o serviço de validação de senha
   ) {}
 

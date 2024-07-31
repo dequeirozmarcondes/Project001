@@ -1,6 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { CreateUserUseCase } from '../application/use-cases/create-user.use-case';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CreateUserUseCase } from '../../use-cases/create-user.use-case';
 import { JwtService } from '@nestjs/jwt';
+import { PasswordHashServiceInterface } from 'src/domain/repositories/interfaces/password-hash.service.interface';
 
 @Injectable()
 export class AuthService {
@@ -9,22 +10,31 @@ export class AuthService {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly jwtService: JwtService,
+    @Inject('PASSWORD_HASH_SERVICE')
+    private readonly passwordHashService: PasswordHashServiceInterface,
   ) {
     // Define o tempo de expiração a partir da variável de ambiente ou um valor padrão
     const expiresInEnv = process.env.JWT_EXPIRES_IN ?? '3600'; // Fallback para '3600' se for undefined
     this.expiresIn = parseInt(expiresInEnv, 10);
   }
 
+  //Metodo signIn
   async signIn(
     username: string,
     password: string,
   ): Promise<{ access_token: string; expires_in: number }> {
-    // Valida o usuário
     const user = await this.createUserUseCase.validatePassword(
       username,
       password,
     );
-    if (!user) {
+
+    if (
+      !user ||
+      !(await this.passwordHashService.validatePassword(
+        password,
+        user.password,
+      ))
+    ) {
       throw new UnauthorizedException('Invalid credentials');
     }
 

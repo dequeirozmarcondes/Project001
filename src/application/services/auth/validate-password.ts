@@ -1,8 +1,8 @@
 import { Injectable, ConflictException, Inject } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { UserRepositoryInterface } from '../interfaces/user.repository.interface';
+import { UserRepositoryInterface } from '../../../domain/repositories/interfaces/user.repository.interface';
 import { User } from 'src/domain/entities/user.entity';
-import { USER_REPOSITORY_TOKEN } from '../tokens';
+import { USER_REPOSITORY_TOKEN } from '../../tokens';
 
 @Injectable()
 export class ValidatePasswordService {

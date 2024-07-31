@@ -9,10 +9,10 @@ import {
   Req,
   BadRequestException,
 } from '@nestjs/common';
-import { AuthGuard } from './auth.guard';
-import { AuthService } from './auth.service';
+import { AuthGuard } from '../../application/services/auth/auth.guard';
+import { AuthService } from '../../application/services/auth/auth.service';
 import { Request } from 'express';
-import { SignInDto } from './dto/sign-in-dto';
+import { SignInDto } from '../../application/dtos/sign-in-dto';
 
 @Controller('auth')
 export class AuthController {
