@@ -14,10 +14,12 @@ export class UserRepository implements UserRepositoryInterface {
       username: user.username,
     };
 
+    // Cria o usuário no banco de dados
     const createdUser = await this.prisma.user.create({
       data: userData,
     });
 
+    // Retorna o usuário criado
     return new User(
       createdUser.username,
       createdUser.email,
@@ -28,6 +30,7 @@ export class UserRepository implements UserRepositoryInterface {
     );
   }
 
+  // Encontra um usuário pelo email
   async findByEmail(email: string): Promise<User | null> {
     const foundUser = await this.prisma.user.findUnique({
       where: { email: email },
@@ -37,6 +40,7 @@ export class UserRepository implements UserRepositoryInterface {
       return null;
     }
 
+    // Retorna o usuário encontrado
     return new User(
       foundUser.username,
       foundUser.email,
@@ -47,6 +51,7 @@ export class UserRepository implements UserRepositoryInterface {
     );
   }
 
+  // Encontra um usuário pelo nome de usuário
   async findByUsername(username: string): Promise<User | null> {
     const foundUser = await this.prisma.user.findUnique({
       where: { username: username },
@@ -56,6 +61,7 @@ export class UserRepository implements UserRepositoryInterface {
       return null;
     }
 
+    // Retorna o usuário encontrado
     return new User(
       foundUser.username,
       foundUser.email,

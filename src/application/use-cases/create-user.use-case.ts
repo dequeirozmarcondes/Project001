@@ -4,6 +4,8 @@ import { User } from '../../domain/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { UserRepositoryInterface } from '../../application/interfaces/user.repository.interface';
 import { USER_REPOSITORY_TOKEN } from 'src/application/tokens'; // Importe o token
+import { HashService } from '../services/hash-password'; // Importe o serviço de hash
+import { ValidatePasswordService } from '../services/validate-password'; // Importe o serviço de validação de senha
 
 const saltOrRounds = 10;
 
@@ -12,15 +14,16 @@ export class CreateUserUseCase {
   constructor(
     @Inject(USER_REPOSITORY_TOKEN)
     private readonly userRepository: UserRepositoryInterface,
+    private readonly hashService: HashService, // Injete o serviço de hash
+    private readonly validatePasswordService: ValidatePasswordService, // Injete o serviço de validação de senha
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
-      // Verifica se o usuário já existe pelo e-mail
+      /// Verifica se o usuário já existe pelo email
       const existingUserEmail = await this.userRepository.findByEmail(
         createUserDto.email,
       );
-
       if (existingUserEmail) {
         throw new ConflictException(
           `User with email '${createUserDto.email}' already exists`,
@@ -38,10 +41,9 @@ export class CreateUserUseCase {
         );
       }
 
-      // Hasheia a senha fornecida
-      const hashedPassword = await bcrypt.hash(
+      //Service de hash password
+      const hashedPassword = await this.hashService.hashPassword(
         createUserDto.password,
-        saltOrRounds,
       );
 
       // Cria um novo usuário
@@ -66,12 +68,12 @@ export class CreateUserUseCase {
     password: string,
   ): Promise<User | null> {
     try {
-      // Busca o usuário pelo nome de usuário
-      const user = await this.userRepository.findByUsername(username);
+      // Usa o ValidatePasswordService para validar a senha
+      const isPasswordValid =
+        await this.validatePasswordService.validatePassword(username, password);
 
-      // Compara a senha fornecida com a senha armazenada
-      if (user && (await bcrypt.compare(password, user.password))) {
-        return user;
+      if (isPasswordValid) {
+        return await this.userRepository.findByUsername(username);
       }
 
       return null;
